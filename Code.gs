@@ -60,87 +60,13 @@ function getDb() {
   return ss;
 }
 
-// =========================================================================
-// ROUTER API: PINTU PENGHUBUNG ANTARA NETLIFY (FRONTEND) & SPREADSHEET (BACKEND)
-// =========================================================================
 
-// doGet: Digunakan untuk MENGAMBIL data dari Spreadsheet (Read)
-function doGet(e) {
-  let action = e.parameter.action;
-  let result = { status: 'error', message: 'Action tidak ditemukan atau kosong.' };
-
-  try {
-    if (action === 'getInitialData') {
-      result = getInitialData();
-    } else if (action === 'getUsulanData') {
-      result = getUsulanData(e.parameter.bidang, e.parameter.username, e.parameter.level);
-    } else if (action === 'getRincianData') {
-      result = getRincianData(e.parameter.idUsulan);
-    } else if (action === 'getUsers') {
-      result = { status: 'success', data: getUsers() };
-    }
-  } catch (error) {
-    result = { status: 'error', message: error.toString() };
-  }
-
-  // Kembalikan output dalam bentuk JSON (bukan HTML lagi)
-  return ContentService.createTextOutput(JSON.stringify(result))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-
-
-// doPost: Digunakan untuk MENGIRIM/MENYIMPAN data ke Spreadsheet (Create, Update, Delete)
-function doPost(e) {
-  let result = { status: 'error', message: 'Action tidak ditemukan atau kosong.' };
-  
-  try {
-    // Menangkap payload JSON yang dikirim dari Netlify
-    let body = JSON.parse(e.postData.contents);
-    let action = body.action;
-
-    if (action === 'verifyLogin') {
-      result = verifyLogin(body.username, body.password);
-    } else if (action === 'saveUsulan') {
-      result = saveUsulan(body.payload);
-    } else if (action === 'updateStatusUsulan') {
-      result = updateStatusUsulan(body.idUsulan, body.statusBaru);
-    } else if (action === 'approveUsulanOlehBidang') {
-      result = approveUsulanOlehBidang(body.idUsulan, body.namaKabid, body.nipKabid, body.linkTtd);
-    } else if (action === 'deleteUsulan') {
-      result = deleteUsulan(body.idUsulan);
-    } else if (action === 'saveRincian') {
-      result = saveRincian(body.payload);
-    } else if (action === 'deleteRincian') {
-      result = deleteRincian(body.idRincian, body.idUsulan);
-    } else if (action === 'saveUser') {
-      result = saveUser(body.oldUsername, body.newUsername, body.nama, body.password, body.bidang, body.level);
-    } else if (action === 'deleteUser') {
-      result = deleteUser(body.username);
-    } else if (action === 'savePengaturanSistem') {
-      result = savePengaturanSistem(body.tahapan, body.deadline, body.tahun);
-    } else if (action === 'approveUsulanOlehAdmin') {
-      result = approveUsulanOlehAdmin(body.idUsulan, body.namaKadis, body.nipKadis, body.linkTtdKadis);
-    } else if (action === 'uploadFileToDrive') {
-      result = uploadFileToDrive(body.base64Data, body.fileName);
-    } else if (action === 'updateLampiranUsulan') {
-      result = updateLampiranUsulan(body.idUsulan, body.linkSurat, body.linkKak, body.linkDukung);
-    }
-
-  } catch (error) {
-    result = { status: 'error', message: error.toString() };
-  }
-
-  // Kembalikan output dalam bentuk JSON
-  return ContentService.createTextOutput(JSON.stringify(result))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-
-/* function doGet(e) {
+ function doGet(e) {
   return HtmlService.createHtmlOutputFromFile('Index')
       .setTitle('E-Planning Dinkes')
       .addMetaTag('viewport', 'width=device-width, initial-scale=1')
       .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-} */
+}
 
 function getDataFromSheet(sheetName) {
   try {
